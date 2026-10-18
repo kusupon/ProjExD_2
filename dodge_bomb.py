@@ -49,6 +49,10 @@ def main():
                 return
         screen.blit(bg_img, [0, 0]) 
 
+        if kk_rct.colliderect(bb_rct): # こうかとんと爆弾のrectが重なった場合
+            print("game over")
+            return
+
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
         # if key_lst[pg.K_UP]:
