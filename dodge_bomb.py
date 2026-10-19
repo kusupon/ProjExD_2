@@ -71,11 +71,33 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     return bb_imgs, bb_accs
 
 
+def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
+    """
+    引数：なし
+    戻り値：移動量のタプルとこうかとんのSurfaceを対応させた辞書
+    移動する8方向と停止時の画像を用意する
+    """
+    kk_img = pg.image.load("fig/3.png")  # 左向きの画像
+    kk_right_img = pg.transform.flip(kk_img, True, False)
+    kk_dict = {
+        (0, 0): pg.transform.rotozoom(kk_img, 0, 0.9),  # キー押下がない場合
+        (+5, 0): pg.transform.rotozoom(kk_right_img, 0, 0.9),  # 右
+        (+5, -5): pg.transform.rotozoom(kk_right_img, 45, 0.9),  # 右上
+        (0, -5): pg.transform.rotozoom(kk_right_img, 90, 0.9),  # 上
+        (-5, -5): pg.transform.rotozoom(kk_img, -45, 0.9),  # 左上
+        (-5, 0): pg.transform.rotozoom(kk_img, 0, 0.9),  # 左
+        (-5, +5): pg.transform.rotozoom(kk_img, 45, 0.9),  # 左下
+        (0, +5): pg.transform.rotozoom(kk_right_img, -90, 0.9),  # 下
+        (+5, +5): pg.transform.rotozoom(kk_right_img, -45, 0.9),  # 右下
+    }
+    return kk_dict
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/pg_bg.jpg")    
-    kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 0.9)
+    kk_imgs = get_kk_imgs()
+    kk_img = kk_imgs[(0, 0)]
     kk_rct = kk_img.get_rect()
     kk_rct.center = 300, 200
     bb_imgs, bb_accs = init_bb_imgs()
@@ -118,6 +140,8 @@ def main():
                 sum_mv[0] += tpl[0] # 横方向移動量
                 sum_mv[1] += tpl[1] # 縦方向移動量
 
+        kk_img = kk_imgs[tuple(sum_mv)]
+        kk_rct = kk_img.get_rect(center=kk_rct.center)
         kk_rct.move_ip(sum_mv)
         if check_bound(kk_rct) != (True, True):  # 座標が画面外にある場合
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  # 先程の動きをキャンセル
