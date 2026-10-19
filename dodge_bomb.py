@@ -14,6 +14,7 @@ DELTA = {
 }
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+
 def check_bound(rect: pg.Rect) -> tuple[bool, bool]:
     """
     引数：こうかとんまたは爆弾のRect
@@ -38,7 +39,7 @@ def gameover(screen: pg.Surface) -> None:
     go_rct = pg.Rect(0,0,WIDTH, HEIGHT)
     pg.draw.rect(go_img, (0, 0, 0), go_rct)
     go_img.set_alpha(220)
-    
+
     message_font = pg.font.Font(None, 80)
     txt = message_font.render("Game Over", True, (255, 255, 255))
     go_img.blit(txt, [400, 300])
@@ -60,7 +61,7 @@ def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
     引数: なし
     戻り値: 複数のサイズの爆弾Surfaceのリストと加速度のリスト
     """
-    bb_imgs = [] # 爆弾Surfaceのリスト定義
+    bb_imgs = []
     for r in range(1, 11):
         bb_img = pg.Surface((20*r, 20*r))
         pg.draw.circle(bb_img, (255, 0, 0), (10*r, 10*r), 10*r)
@@ -109,10 +110,11 @@ def calc_orientation(org: pg.Rect, dst: pg.Rect, current_xy: tuple[float, float]
     # 方向を保ったまま，ベクトルの長さをそろえる
     return dx / distance * speed, dy / distance * speed
 
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
-    bg_img = pg.image.load("fig/pg_bg.jpg")    
+    bg_img = pg.image.load("fig/pg_bg.jpg")
     kk_imgs = get_kk_imgs()
     kk_img = kk_imgs[(0, 0)]
     kk_rct = kk_img.get_rect()
@@ -127,16 +129,16 @@ def main():
     tmr = 0
     while True:
         for event in pg.event.get():
-            if event.type == pg.QUIT: 
+            if event.type == pg.QUIT:
                 return
-        screen.blit(bg_img, [0, 0]) 
+        screen.blit(bg_img, [0, 0])
 
         idx = min(tmr // 500, 9)
         bb_img = bb_imgs[idx]
         bb_rct.width = bb_img.get_width()
         bb_rct.height = bb_img.get_height()
 
-        if kk_rct.colliderect(bb_rct): # こうかとんと爆弾のrectが重なった場合
+        if kk_rct.colliderect(bb_rct):  # こうかとんと爆弾のrectが重なった場合
             gameover(screen)
             pg.display.update()
             time.sleep(5)
@@ -144,18 +146,10 @@ def main():
 
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
-        # if key_lst[pg.K_UP]:
-        #     sum_mv[1] -= 5
-        # if key_lst[pg.K_DOWN]:
-        #     sum_mv[1] += 5
-        # if key_lst[pg.K_LEFT]:
-        #     sum_mv[0] -= 5
-        # if key_lst[pg.K_RIGHT]:
-        #     sum_mv[0] += 5
         for k, tpl in DELTA.items():
             if key_lst[k]:
-                sum_mv[0] += tpl[0] # 横方向移動量
-                sum_mv[1] += tpl[1] # 縦方向移動量
+                sum_mv[0] += tpl[0]  # 横方向移動量
+                sum_mv[1] += tpl[1]  # 縦方向移動量
 
         kk_img = kk_imgs[tuple(sum_mv)]
         kk_rct = kk_img.get_rect(center=kk_rct.center)
@@ -170,9 +164,9 @@ def main():
         avy = vy * bb_accs[idx]
         bb_rct.move_ip(avx, avy)
         yoko, tate = check_bound(bb_rct)
-        if not yoko:  
+        if not yoko:
             vx *= -1
-        if not tate:  
+        if not tate:
             vy *= -1
         screen.blit(bb_img, bb_rct)
         pg.display.update()
