@@ -92,6 +92,23 @@ def get_kk_imgs() -> dict[tuple[int, int], pg.Surface]:
     }
     return kk_dict
 
+
+def calc_orientation(org: pg.Rect, dst: pg.Rect, current_xy: tuple[float, float]) -> tuple[float, float]:
+    """
+    引数：爆弾のRect こうかとんのRect 現在の移動方向
+    戻り値：移動方向を表すタプル（vx,vy）
+    距離が300未満なら現在の方向を保ち, それ以外はこうかとんへ追従する
+    """
+    # 爆弾からこうかとんへの方向を求める
+    dx = dst.centerx - org.centerx
+    dy = dst.centery - org.centery
+    distance = (dx ** 2 + dy ** 2) ** 0.5  # 中心同士の距離
+    if distance < 300:
+        return current_xy  # 近いときは今の方向へ直進する
+    speed = 50 ** 0.5  # 速度ベクトルの長さを√50に
+    # 方向を保ったまま，ベクトルの長さをそろえる
+    return dx / distance * speed, dy / distance * speed
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -146,6 +163,9 @@ def main():
         if check_bound(kk_rct) != (True, True):  # 座標が画面外にある場合
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])  # 先程の動きをキャンセル
         screen.blit(kk_img, kk_rct)
+        # 爆弾の進む方向を更新する
+        vx, vy = calc_orientation(bb_rct, kk_rct, (vx, vy))
+        # 時間経過に応じた速度倍率を掛ける
         avx = vx * bb_accs[idx]
         avy = vy * bb_accs[idx]
         bb_rct.move_ip(avx, avy)
